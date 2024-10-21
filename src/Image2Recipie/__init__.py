@@ -16,4 +16,4 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
-logger=logging.getLogger('image2recipie')
+logger=logging.getLogger('image2recipie') 

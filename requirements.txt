@@ -16,4 +16,5 @@ Flask
 Flask-Cors
 gdown
 opencv-python
+kaggle
 -e .
