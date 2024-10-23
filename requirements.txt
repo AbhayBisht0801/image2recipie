@@ -16,5 +16,5 @@ Flask
 Flask-Cors
 gdown
 opencv-python
-kaggle
+langdetect
 -e .

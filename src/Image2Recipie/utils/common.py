@@ -13,6 +13,7 @@ import cv2 as cv
 import pickle
 import numpy as np
 from numpy.linalg import norm
+import re
 
 
 @ensure_annotations
@@ -157,3 +158,14 @@ def decodeImage(imgstring, fileName):
 def encodeImageIntoBase64(croppedImagePath):
     with open(croppedImagePath, "rb") as f:
         return base64.b64encode(f.read())
+def format_recipe_ingredients(text):
+  result=text.replace('\t','').replace('\n\n',',').replace('\n','').replace(',','',1)
+  return result
+def detect_english_text(df):
+    non_english=[]
+    for i in range(0,df.shape[0]):
+        if re.search(r"[A-Za-z]",df['name'][i][0]):
+            None
+        else:
+            non_english.append(i)
+    return non_english

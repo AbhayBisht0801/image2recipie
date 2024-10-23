@@ -2,7 +2,7 @@ import os
 import urllib.request as request 
 import gdown
 from Image2Recipie import logger
-from Image2Recipie.utils.common import get_size
+from Image2Recipie.utils.common import get_size,format_recipe_ingredients,detect_english_text
 import zipfile
 from Image2Recipie.entity.config_entity import DataIngestionConfig
 from pathlib import Path
@@ -28,3 +28,14 @@ class DataIngestion:
         os.makedirs(unzip_path,exist_ok=True)
         with zipfile.ZipFile(self.config.local_data_file,'r') as zip_ref:
             zip_ref.extractall(unzip_path)
+    def pre_process(self):
+        df=pd.read_csv(os.path.join(self.config.unzip_dir,'cuisine_updated.csv'))
+        df['cleaned_ingredient']=df['ingredients'].apply(format_recipe_ingredients)
+        df['cleaned_ingredient']=df['cleaned_ingredient'].apply(lambda x:','.join([x.strip() for x in x.split(',')]))
+        
+        non_english=detect_english_text(df=df)
+        df.drop(index=non_english,inplace=True)
+        df.reset_index(inplace=True)
+        df.drop(columns=['index'],inplace=True)
+        df.to_csv(os.path.join(self.config.unzip_dir,'cuisine_updated.csv'))
+        logger.info(f'Preprocessed csv data is stored in {self.config.unzip_dir}')
