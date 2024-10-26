@@ -14,8 +14,13 @@ import pickle
 import numpy as np
 from numpy.linalg import norm
 import re
-
-
+import re
+from string import punctuation
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
+stopword=stopwords.words('english')
+stopword.append('ingredients')
 @ensure_annotations
 def read_yaml(path_to_yaml: Path) -> ConfigBox:
     """reads yaml file and returns
@@ -169,3 +174,101 @@ def detect_english_text(df):
         else:
             non_english.append(i)
     return non_english
+def get_maxlen(data):
+    maxlen = 0
+    for sent in data:
+        maxlen = max(maxlen, len(sent))
+    return maxlen
+
+def clean_ingredients(recipe):
+    # Regular expression to match optional quantities, measurements, or just ingredients.
+    pattern = r'(\d+\s*\/?\d*)\s*(tablespoons|teaspoons|cups|cup|inch|cloves|whole|grams|g|cup|gram|kgs|kg|ml|liters|tablespoon?|teaspoon|)\s+([A-Za-z\s]+)|([^.,]*?)(?=\bfor\b)|(salt|oil|\w+ oil)?'
+
+# Compile the pattern
+    regex = re.compile(pattern)
+    ingredients = []
+    # Find all matches in the text
+    matches = regex.findall(recipe)
+    for match in matches:
+        if match[2]!='':
+          if [item for item in match[2].split() if item in stopword or item in punctuation]:
+            None
+          else:
+            ingredients.append(match[2].split('for')[0])
+        elif match[3]!='':
+          if [item for item in match[3].split() if item in stopword or item in punctuation]:
+            None
+          else:
+            ingredients.append(match[3])
+        elif match[4]!='':
+          if [item for item in match[4].split() if item in stopword or item in punctuation]:
+            None
+          else:
+            ingredients.append(match[4])
+    return ','.join([x for x in ingredients if x!=''])
+class CustomTokenizer:
+    def __init__(self):
+        self.ytoken = None
+        self.word_index = None
+        self.word_frequency = None
+        
+
+    def fit_transform(self,column):
+        dicts = {}
+        occurance = {}
+        ytokens = []
+        counter = 1
+
+        # Iterate through each row in the specified column
+        for i in range(column.shape[0]):
+            each_token = []
+            # Split tokens by comma and process
+            for j in column[i].lower().split(','):
+                token = j.strip()
+                if token not in dicts.values():
+                    dicts[counter] = token
+                    occurance[token] = 1
+                    each_token.append(counter)
+                    counter += 1
+                else:
+                    # Find the key for the existing token more efficiently
+                    token_id = next(k for k, v in dicts.items() if v == token)
+                    occurance[token] += 1
+                    each_token.append(token_id)
+
+            ytokens.append(each_token)
+
+        # Set the attributes
+        self.ytoken = ytokens
+        self.word_index = dicts
+        self.word_frequency = occurance
+    
+
+        return self.ytoken
+    def inverse_transform(self,output):
+      for i in output:
+        if type(i)==list:
+              for key, value in self.word_index.items():
+                if key not in i:
+                  continue
+                index = i.index(key)
+                output[index] = value
+        else:
+          for key, value in self.word_index.items():
+            if key not in output:
+              continue
+            index = output.index(key)
+            output[index] = value
+            
+            
+   
+
+
+
+    def get_word_index(self):
+        """Returns the word-to-index mapping dictionary."""
+        return self.word_index
+
+    def get_word_frequency(self):
+        """Returns the word frequency dictionary."""
+        return self.word_frequency

@@ -5,3 +5,10 @@ data_ingestion:
   source_URL: https://drive.google.com/file/d/1ZrS4NIpzoWuiMvrznEX0q72kTNDFr1oC/view?usp=sharing
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
+preprocessing:
+  root_dir: artifacts/preprocessing
+  input_preprocess: artifacts/preprocessing/inputs_preprocess
+  image_input: artifacts/preprocessing/inputs_preprocess/image_input.pkl
+  text_input: artifacts/preprocessing/inputs_preprocess/text_input.pkl
+  output_preprocess: artifacts/preprocessing/output_preprocess
+
