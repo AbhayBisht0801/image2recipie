@@ -20,7 +20,9 @@ from nltk.corpus import stopwords
 import nltk
 nltk.download('stopwords')
 stopword=stopwords.words('english')
+
 stopword.append('ingredients')
+stopword.extend(['trimmed','chopped','gm'])
 @ensure_annotations
 def read_yaml(path_to_yaml: Path) -> ConfigBox:
     """reads yaml file and returns
@@ -164,7 +166,7 @@ def encodeImageIntoBase64(croppedImagePath):
     with open(croppedImagePath, "rb") as f:
         return base64.b64encode(f.read())
 def format_recipe_ingredients(text):
-  result=text.replace('\t','').replace('\n\n',',').replace('\n','').replace(',','',1)
+  result=text.lower().replace('\t','').replace('\n\n',',').replace('\n','').replace(',','',1).replace('\xa0',' ')
   return result
 def detect_english_text(df):
     non_english=[]

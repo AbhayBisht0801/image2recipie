@@ -15,3 +15,12 @@ class  DataPreprocessConfig:
     text_input:Path
     output_preprocess:Path
     unzip_dir:Path
+@dataclass(frozen=True)
+class  Model_prepare_Config:
+    root_dir:Path
+    training_model:Path
+    text_feature:Path
+    params_image_size:list
+    params_learning_rate:float
+    params_weights:str
+    params_include_top:bool

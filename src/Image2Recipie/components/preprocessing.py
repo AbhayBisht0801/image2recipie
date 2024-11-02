@@ -8,6 +8,7 @@ from Image2Recipie.config.configuration import DataPreprocessConfig
 import cv2 as cv
 import pandas as pd
 import numpy as np
+from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 

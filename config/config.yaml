@@ -11,7 +11,7 @@ preprocessing:
   image_input: artifacts/preprocessing/inputs_preprocess/image_input.pkl
   text_input: artifacts/preprocessing/inputs_preprocess/text_input.pkl
   output_preprocess: artifacts/preprocessing/output_preprocess
- prepare_model:
+prepare_model:
   root_dir: artifacts/prepare_model
-  training_model: artifacts/prepare_model/training_model.pkl
+  training_model: artifacts/prepare_model/training_model.keras
 

@@ -32,7 +32,7 @@ class DataIngestion:
         df=pd.read_csv(os.path.join(self.config.unzip_dir,'cuisine_updated.csv'))
         df['cleaned_ingredient']=df['ingredients'].apply(format_recipe_ingredients)
         df['cleaned_ingredient']=df['cleaned_ingredient'].apply(lambda x:','.join([x.strip() for x in x.split(',')]))
-        
+        df['clean_ingredient']=df['cleaned_ingredient'].str.lower()
         non_english=detect_english_text(df=df)
         df.drop(index=non_english,inplace=True)
         df.reset_index(inplace=True)

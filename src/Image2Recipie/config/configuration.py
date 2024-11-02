@@ -1,6 +1,6 @@
 from Image2Recipie.constants import *
 from Image2Recipie.utils.common import read_yaml,create_directories
-from Image2Recipie.entity.config_entity import DataIngestionConfig,DataPreprocessConfig
+from Image2Recipie.entity.config_entity import DataIngestionConfig,DataPreprocessConfig,Model_prepare_Config
 class ConfigurationManager:
     def __init__(
             self,
@@ -36,3 +36,18 @@ class ConfigurationManager:
             unzip_dir=config.data_ingestion.unzip_dir
         )
         return data_preprocess_config
+    def get_prepare_model_config(self)->Model_prepare_Config:
+        config=self.config
+        create_directories([config.prepare_model.root_dir])
+        prepare_model_config=Model_prepare_Config(
+            root_dir=self.config.prepare_model.root_dir,
+            training_model=self.config.prepare_model.training_model,
+            text_feature=os.path.join(self.config.preprocessing.root_dir,'features.pkl'),
+            params_image_size=self.params.IMAGE_SIZE,
+            params_learning_rate=self.params.LEARNING_RATE,
+            params_include_top=self.params.INCLUDE_TOP,
+            params_weights=self.params.WEIGHTS
+
+            
+        )
+        return prepare_model_config
