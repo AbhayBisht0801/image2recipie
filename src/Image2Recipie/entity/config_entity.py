@@ -24,3 +24,14 @@ class  Model_prepare_Config:
     params_learning_rate:float
     params_weights:str
     params_include_top:bool
+@dataclass(frozen=True)
+class  Model_Training_Config:
+    root_dir:Path
+    training_model:Path
+    params_batch_size:int
+    output_preprocess:Path
+    input_preprocess:Path
+    image_input:Path
+    text_input:Path
+    params_epochs:int
+    trained_model_path:Path

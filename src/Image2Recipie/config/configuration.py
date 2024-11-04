@@ -1,6 +1,6 @@
 from Image2Recipie.constants import *
 from Image2Recipie.utils.common import read_yaml,create_directories
-from Image2Recipie.entity.config_entity import DataIngestionConfig,DataPreprocessConfig,Model_prepare_Config
+from Image2Recipie.entity.config_entity import DataIngestionConfig,DataPreprocessConfig,Model_prepare_Config,Model_Training_Config
 class ConfigurationManager:
     def __init__(
             self,
@@ -51,3 +51,20 @@ class ConfigurationManager:
             
         )
         return prepare_model_config
+    def get_training_model_config(self)->Model_Training_Config:
+        config=self.config
+        create_directories([config.training.root_dir])
+        training_model_config=Model_Training_Config(
+            root_dir=self.config.training.root_dir,
+            training_model=self.config.prepare_model.training_model,
+            params_batch_size=self.params.BATCH_SIZE,
+            output_preprocess=self.config.preprocessing.output_preprocess,
+            text_input=self.config.preprocessing.text_input,
+            image_input=self.config.preprocessing.image_input,
+            params_epochs=self.params.EPOCHS,
+            trained_model_path=self.config.training.trained_model_path,
+            input_preprocess=self.config.preprocessing.input_preprocess
+
+            
+        )
+        return training_model_config

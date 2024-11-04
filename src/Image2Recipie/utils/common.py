@@ -182,9 +182,11 @@ def get_maxlen(data):
         maxlen = max(maxlen, len(sent))
     return maxlen
 
+import re
+from string import punctuation
 def clean_ingredients(recipe):
     # Regular expression to match optional quantities, measurements, or just ingredients.
-    pattern = r'(\d+\s*\/?\d*)\s*(tablespoons|teaspoons|cups|cup|inch|cloves|whole|grams|g|cup|gram|kgs|kg|ml|liters|tablespoon?|teaspoon|)\s+([A-Za-z\s]+)|([^.,]*?)(?=\bfor\b)|(salt|oil|\w+ oil)?'
+    pattern = r'(\d+\s*\/?\d*)\s*(tablespoons|teaspoons|cups|cup|inch|cloves|whole|grams|g|gm|cup|gram|kgs|kg|ml|liters|tablespoon?|teaspoon|litters|chopped|trimmed|tsp|)\s+([A-Za-z\s]+)|([^.,]*?)(?=\bfor\b)|(salt|oil|\w+ oil)?'
 
 # Compile the pattern
     regex = re.compile(pattern)
@@ -193,21 +195,22 @@ def clean_ingredients(recipe):
     matches = regex.findall(recipe)
     for match in matches:
         if match[2]!='':
-          if [item for item in match[2].split() if item in stopword or item in punctuation]:
+          if [item for item in match[2].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[2].split('for')[0])
         elif match[3]!='':
-          if [item for item in match[3].split() if item in stopword or item in punctuation]:
+          if [item for item in match[3].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[3])
         elif match[4]!='':
-          if [item for item in match[4].split() if item in stopword or item in punctuation]:
+          if [item for item in match[4].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[4])
     return ','.join([x for x in ingredients if x!=''])
+
 class CustomTokenizer:
     def __init__(self):
         self.ytoken = None
