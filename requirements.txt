@@ -17,4 +17,6 @@ Flask-Cors
 gdown
 opencv-python
 langdetect
+pydot 
+graphviz
 -e .

@@ -18,11 +18,13 @@ import re
 from string import punctuation
 from nltk.corpus import stopwords
 import nltk
-nltk.download('stopwords')
-stopword=stopwords.words('english')
+import re
+from string import punctuation
 
-stopword.append('ingredients')
-stopword.extend(['trimmed','chopped','gm'])
+nltk.download('stopwords')
+stopwords=stopwords.words('english')
+stopwords.append('ingredients')
+stopwords.extend(['trimmed','chopped','gm','inch'])
 @ensure_annotations
 def read_yaml(path_to_yaml: Path) -> ConfigBox:
     """reads yaml file and returns
@@ -182,11 +184,10 @@ def get_maxlen(data):
         maxlen = max(maxlen, len(sent))
     return maxlen
 
-import re
-from string import punctuation
+
 def clean_ingredients(recipe):
     # Regular expression to match optional quantities, measurements, or just ingredients.
-    pattern = r'(\d+\s*\/?\d*)\s*(tablespoons|teaspoons|cups|cup|inch|cloves|whole|grams|g|gm|cup|gram|kgs|kg|ml|liters|tablespoon?|teaspoon|litters|chopped|trimmed|tsp|)\s+([A-Za-z\s]+)|([^.,]*?)(?=\bfor\b)|(salt|oil|\w+ oil)?'
+    pattern = r'(\d+\s*\/?\d*)\s*(tablespoons|teaspoons|cups|cup|inch|cloves|whole|grams|g|gm|cup|gram|kgs|kg|ml|pieces|liters|liter|tablespoon?|teaspoon|litters|litter|chopped|trimmed|tsp|fresh|)\s+([A-Za-z\s]+)|([^.,]*?)(?=\bfor\b)|(salt|oil|ghee|water|butter|almonds?|cashews?|raisins?|dates?|pistachios?|walnuts?|apricots?|prunes?|figs?|hazelnuts?|pecans?|macadamia|brazil\s?nuts?|cherries?|cranberries?|blueberries?|peanuts?|\w+ oil|\w+ butter)?'
 
 # Compile the pattern
     regex = re.compile(pattern)
@@ -195,17 +196,17 @@ def clean_ingredients(recipe):
     matches = regex.findall(recipe)
     for match in matches:
         if match[2]!='':
-          if [item for item in match[2].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
+          if [item for item in match[2].split() if item in stopwords or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[2].split('for')[0])
         elif match[3]!='':
-          if [item for item in match[3].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
+          if [item for item in match[3].split() if item in stopwords or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[3])
         elif match[4]!='':
-          if [item for item in match[4].split() if item in stopword or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
+          if [item for item in match[4].split() if item in stopwords or any(char in item for char in punctuation) or any(char.isdigit() for char in item)]:
             None
           else:
             ingredients.append(match[4])
@@ -216,60 +217,44 @@ class CustomTokenizer:
         self.ytoken = None
         self.word_index = None
         self.word_frequency = None
-        
 
     def fit_transform(self,column):
-        dicts = {}
-        occurance = {}
-        ytokens = []
-        counter = 1
-
-        # Iterate through each row in the specified column
-        for i in range(column.shape[0]):
-            each_token = []
-            # Split tokens by comma and process
-            for j in column[i].lower().split(','):
-                token = j.strip()
-                if token not in dicts.values():
-                    dicts[counter] = token
-                    occurance[token] = 1
-                    each_token.append(counter)
-                    counter += 1
-                else:
-                    # Find the key for the existing token more efficiently
-                    token_id = next(k for k, v in dicts.items() if v == token)
-                    occurance[token] += 1
-                    each_token.append(token_id)
-
-            ytokens.append(each_token)
-
-        # Set the attributes
-        self.ytoken = ytokens
-        self.word_index = dicts
-        self.word_frequency = occurance
-    
-
-        return self.ytoken
+        y_token=[]
+        word_frequency={}
+        for i in column:
+          for j in i.split(','):
+            if j not in word_frequency.keys():
+              word_frequency[j]=1
+            else:
+              word_frequency[j]+=1
+        result=sorted(word_frequency.items(), key=lambda x: x[1], reverse=True)
+        word_index={}
+        counter=1
+        for i in result:
+          word_index[i[0]]=counter
+          counter+=1
+        self.word_index=word_index
+        self.word_frequency=word_frequency
+        for i in column:
+          each_token=[]
+          for j in i.split(','):
+            each_token.append(word_index[j])
+          y_token.append(each_token)
+        return y_token
     def inverse_transform(self,output):
-      for i in output:
+      for index,i in enumerate(output):
         if type(i)==list:
-              for key, value in self.word_index.items():
-                if key not in i:
-                  continue
-                index = i.index(key)
-                output[index] = value
+          for index,value in enumerate(i):
+            for key,values in self.word_index.items():
+              if value==values:
+                i[index]=key
         else:
-          for key, value in self.word_index.items():
-            if key not in output:
-              continue
-            index = output.index(key)
-            output[index] = value
-            
-            
-   
+          for key,values in self.word_index.items():
+            if i==values:
+              output[index]=key
 
 
-
+      return output
     def get_word_index(self):
         """Returns the word-to-index mapping dictionary."""
         return self.word_index
@@ -277,3 +262,4 @@ class CustomTokenizer:
     def get_word_frequency(self):
         """Returns the word frequency dictionary."""
         return self.word_frequency
+
